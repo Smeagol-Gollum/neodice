@@ -10,7 +10,8 @@ var config = {
   // - For your faucet to work, you must register your site at Recaptcha
   // - https://www.google.com/recaptcha/intro/index.html
   recaptcha_sitekey: '6Le3dQoTAAAAABZVe_2-XokNDzHGDUjXRL_wrcJk',  // <----- EDIT ME!
-  redirect_uri: 'https://smeagol-gollum.github.io/neodice',
+  // redirect_uri: 'https://neodice.github.io/',
+  redirect_uri: 'http://localhost:5000',
   mp_browser_uri: 'https://www.moneypot.com',
   mp_api_uri: 'https://api.moneypot.com',
   chat_uri: 'https://a-chat-server.herokuapp.com',
@@ -656,7 +657,8 @@ var UserBox = React.createClass({
             href: config.mp_browser_uri + '/oauth/authorize' +
               '?app_id=' + config.app_id +
               '&redirect_uri=' + config.redirect_uri,
-            className: 'btn btn-default'
+            className: 'btn btn-success hvr-ripple-out wow fadeInDown',
+            'data-wow-delay':'0.5s'
           },
           'Login with Moneypot'
         )
@@ -677,30 +679,11 @@ var Navbar = React.createClass({
       {className: 'navbar'},
       el.div(
         {className: 'container-fluid'},
+        React.createElement(UserBox, null),
         el.div(
           {className: 'navbar-header'},
-          el.a({className: 'navbar-brand', href:'/'}, config.app_name)
-        ),
-        // Links
-        el.ul(
-          {className: 'nav navbar-nav'},
-          el.li(
-            null,
-            el.a(
-              {
-                href: config.mp_browser_uri + '/apps/' + config.app_id,
-                target: '_blank'
-              },
-              'View on Moneypot ',
-              // External site glyphicon
-              el.span(
-                {className: 'glyphicon glyphicon-new-window'}
-              )
-            )
-          )
-        ),
-        // Userbox
-        React.createElement(UserBox, null)
+          el.a({className: 'navbar-brand wow fadeInDown', 'data-wow-delay':'0.5s', href:'/'}, config.app_name)
+        )
       )
     );
   }
@@ -811,7 +794,7 @@ var ChatUserList = React.createClass({
         {className: 'panel panel-default'},
         el.div(
           {className: 'panel-heading'},
-          'UserList'
+          'Users Currently Online'
         ),
         el.div(
           {className: 'panel-body'},
@@ -877,7 +860,7 @@ var ChatBox = React.createClass({
     return el.div(
       {id: 'chat-box'},
       el.div(
-        {className: 'panel panel-default'},
+        {className: 'panel panel-default hidden'},
         el.div(
           {className: 'panel-body'},
           el.ul(
@@ -961,7 +944,7 @@ var BetBoxChance = React.createClass({
     return el.div(
       {},
       el.span(
-        {className: 'lead', style: { fontWeight: 'bold' }},
+        {className: 'lead'},
         'Chance:'
       ),
       innerNode
@@ -1006,7 +989,7 @@ var BetBoxProfit = React.createClass({
     return el.div(
       null,
       el.span(
-        {className: 'lead', style: { fontWeight: 'bold' }},
+        {className: 'lead'},
         'Profit: '
       ),
       innerNode
@@ -1072,7 +1055,7 @@ var BetBoxMultiplier = React.createClass({
       {className: 'form-group'},
       el.p(
         {className: 'lead'},
-        el.strong(
+        el.span(
           {
             style: betStore.state.multiplier.error ? { color: 'red' } : {}
           },
@@ -1151,10 +1134,10 @@ var BetBoxWager = React.createClass({
       {className: 'form-group'},
       el.p(
         {className: 'lead'},
-        el.strong(
+        el.span(
           // If wagerError, make the label red
           betStore.state.wager.error ? { style: {color: 'red'} } : null,
-          'Wager:')
+          'Bet:')
       ),
       el.input(
         {
@@ -1314,8 +1297,8 @@ var BetBoxButton = React.createClass({
       // If there's a betbox error, then render button in error state
 
       var errorTranslations = {
-        'CANNOT_AFFORD_WAGER': 'You cannot afford wager',
-        'INVALID_WAGER': 'Invalid wager',
+        'CANNOT_AFFORD_WAGER': 'You can\'t afford that bet!',
+        'INVALID_WAGER': 'Invalid bet',
         'INVALID_MULTIPLIER': 'Invalid multiplier',
         'MULTIPLIER_TOO_PRECISE': 'Multiplier too precise',
         'MULTIPLIER_TOO_HIGH': 'Multiplier too high',
@@ -1369,7 +1352,7 @@ var BetBoxButton = React.createClass({
           href: config.mp_browser_uri + '/oauth/authorize' +
             '?app_id=' + config.app_id +
             '&redirect_uri=' + config.redirect_uri,
-          className: 'btn btn-lg btn-block btn-success'
+          className: 'btn btn-lg btn-block btn-success hvr-ripple-out'
         },
         'Login with MoneyPot'
       );
@@ -1678,9 +1661,12 @@ var FaucetTabContent = React.createClass({
 
     // If user is not logged in, let them know only logged-in users can claim
     if (!worldStore.state.user) {
-      return el.p(
-        {className: 'lead'},
-        'You must login to claim faucet'
+      return el.div(
+        {id: 'faucet-login-warning'},
+        el.p(
+          {className: 'lead'},
+          'Please log in to claim faucet bonuses!'
+        )
       );
     }
 
@@ -1756,15 +1742,31 @@ var Footer = React.createClass({
       {
         className: 'text-center text-muted',
         style: {
-          marginTop: '200px'
+          marginTop: '200px',
+          marginBottom: '30px'
         }
       },
-      'Powered by ',
+      'copyright 2015 ',
       el.a(
         {
-          href: 'https://www.moneypot.com'
+          href: 'https://neodice.github.io'
         },
-        'Moneypot'
+        'neodice'
+      ),
+      el.span(
+        null,
+        ' | View on '
+      ),
+      el.a(
+        {
+          href: config.mp_browser_uri + '/apps/' + config.app_id,
+          target: '_blank'
+        },
+        'Moneypot ',
+        // External site glyphicon
+        el.span(
+          {className: 'glyphicon glyphicon-new-window'}
+        )
       )
     );
   }
@@ -1781,21 +1783,24 @@ var App = React.createClass({
       el.div(
         {className: 'row'},
         el.div(
-          {className: 'col-sm-5'},
+          {className: 'col-sm-6 col-sm-offset-3 wow fadeIn', 'data-wow-delay':'0.3s'},
           React.createElement(BetBox, null)
-        ),
+        )/*,
         el.div(
           {className: 'col-sm-7'},
           React.createElement(ChatBox, null)
-        )
+        )*/
       ),
       // Tabs
       el.div(
-        {style: {marginTop: '15px'}},
+        {className: 'col-sm-6 col-sm-offset-3 wow fadeIn', 'data-wow-delay':'0.3s', style: {marginTop: '15px'}},
         React.createElement(Tabs, null)
       ),
       // Tab Contents
-      React.createElement(TabContent, null),
+      el.div(
+        {className: 'col-sm-6 col-sm-offset-3 wow fadeIn', 'data-wow-delay':'0.3s'},
+        React.createElement(TabContent, null)
+      ),
       // Footer
       React.createElement(Footer, null)
     );
@@ -1811,7 +1816,7 @@ React.render(
 // If accessToken, then
 if (!worldStore.state.accessToken) {
   Dispatcher.sendAction('STOP_LOADING');
-  connectToChatServer();
+  // connectToChatServer();
 } else {
   // Load user from accessToken
   MoneyPot.getTokenInfo({
@@ -1825,7 +1830,7 @@ if (!worldStore.state.accessToken) {
     },
     complete: function() {
       Dispatcher.sendAction('STOP_LOADING');
-      connectToChatServer();
+      // connectToChatServer();
     }
   });
   // Get next bet hash
