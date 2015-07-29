@@ -1381,18 +1381,24 @@ var HotkeyToggle = React.createClass({
   }
 });
 
-var AutobetModal = React.createClass({
-  displayName: 'AutobetModal',
+var AutobetButtons = React.createClass({
+  displayName: 'AutobetButtons',
   _onStoreChange: function() {
     this.forceUpdate();
   },
   componentDidMount: function() {
     worldStore.on('change', this._onStoreChange);
+    betStore.on('change', this._onStoreChange);
   },
   componentWillUnmount: function() {
     worldStore.off('change', this._onStoreChange);
+    betStore.off('change', this._onStoreChange);
   },
-  _autoBetHandler: function(cond) {
+  getInitialState: function() {
+    return { waitingForServer: false };
+  },
+  // cond is '>' or '<'
+  _makeBetHandler: function(cond) {
     var self = this;
 
     console.assert(cond === '<' || cond === '>');
@@ -1468,6 +1474,114 @@ var AutobetModal = React.createClass({
     };
   },
   render: function() {
+    var innerNode;
+
+    // TODO: Create error prop for each input
+    var error = betStore.state.wager.error || betStore.state.multiplier.error;
+
+    if (worldStore.state.isLoading) {
+      // If app is loading, then just disable button until state change
+      innerNode = el.button(
+        {type: 'button', disabled: true, className: 'btn btn-lg btn-block btn-default'},
+        'Loading...'
+      );
+    } else if (error) {
+      // If there's a betbox error, then render button in error state
+
+      var errorTranslations = {
+        'CANNOT_AFFORD_WAGER': 'You can\'t afford that bet!',
+        'INVALID_WAGER': 'Invalid bet',
+        'INVALID_MULTIPLIER': 'Invalid multiplier',
+        'MULTIPLIER_TOO_PRECISE': 'Multiplier too precise',
+        'MULTIPLIER_TOO_HIGH': 'Multiplier too high',
+        'MULTIPLIER_TOO_LOW': 'Multiplier too low'
+      };
+
+      innerNode = el.button(
+        {type: 'button',
+         disabled: true,
+         className: 'btn btn-lg btn-block btn-danger'},
+        errorTranslations[error] || 'Invalid bet'
+      );
+    } else if (worldStore.state.user) {
+      // If user is logged in, let them submit bet
+      innerNode =
+        el.div(
+          {className: 'row'},
+          // bet hi
+          el.div(
+            {className: 'col-xs-6'},
+            el.button(
+              {
+                id: 'autobet-hi',
+                type: 'button',
+                className: 'btn btn-lg btn-success hvr-ripple-out btn-block',
+                onClick: this._makeBetHandler('>'),
+                disabled: !!this.state.waitingForServer
+              },
+              'Autobet Hi '
+            )
+          ),
+          // bet lo
+          el.div(
+            {className: 'col-xs-6'},
+            el.button(
+              {
+                id: 'autobet-lo',
+                type: 'button',
+                className: 'btn btn-lg btn-info hvr-ripple-out btn-block',
+                onClick: this._makeBetHandler('<'),
+                disabled: !!this.state.waitingForServer
+              },
+              'Autobet Lo '
+            )
+          )
+        );
+    } else {
+      // If user isn't logged in, give them link to /oauth/authorize
+      innerNode = el.a(
+        {
+          href: config.mp_browser_uri + '/oauth/authorize' +
+            '?app_id=' + config.app_id +
+            '&redirect_uri=' + config.redirect_uri,
+          className: 'btn btn-lg btn-block btn-success hvr-ripple-out'
+        },
+        'Login with MoneyPot'
+      );
+    }
+
+    return el.div(
+      null,
+      el.div(
+        {className: 'col-md-2',},
+        (this.state.waitingForServer) ?
+          el.span(
+            {
+              className: 'glyphicon glyphicon-refresh rotate',
+              style: { marginTop: '15px' }
+            }
+          ) : ''
+      ),
+      el.div(
+        {className: 'col-md-12'},
+        innerNode
+      )
+    );
+  }
+});
+
+var AutobetModal = React.createClass({
+  displayName: 'AutobetModal',
+  _onStoreChange: function() {
+    this.forceUpdate();
+  },
+  componentDidMount: function() {
+    worldStore.on('change', this._onStoreChange);
+  },
+  componentWillUnmount: function() {
+    worldStore.off('change', this._onStoreChange);
+  },
+  render: function() {
     return el.div(
       null,
       el.div(
@@ -1500,7 +1614,7 @@ var AutobetModal = React.createClass({
                 ),
                 el.div(
                   {className: 'col-xs-6'},
-                  React.createElement(BetBoxWager, null)
+                  React.createElement(AutobetBoxWager, null)
                 ),
                 el.div(
                   {className: 'col-xs-6'},
@@ -1530,15 +1644,14 @@ var AutobetModal = React.createClass({
                   {className: 'row'},
                   el.div(
                     {className: 'col-xs-12'},
-                    React.createElement(BetBoxButton, null)
+                    React.createElement(AutobetButtons, null)
                   )
                 )
               )
             )
           )
         )
-      ),
-      React.createElement(HotkeyToggle, null)
+      )
     );
   }
 });
