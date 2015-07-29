@@ -1348,7 +1348,7 @@ var BetBoxButton = React.createClass({
           ) : ''
       ),
       el.div(
-        {className: 'col-md-8'},
+        {className: 'col-md-12'},
         innerNode
       )
     );
