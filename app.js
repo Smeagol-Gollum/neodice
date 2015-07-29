@@ -18,7 +18,7 @@ var config = {
   debug: isRunningLocally(),
   // - Set this to true if you want users that come to http:// to be redirected
   //   to https://
-  force_https_redirect: !isRunningLocally()
+  force_https_redirect: false
 };
 
 ////////////////////////////////////////////////////////////
