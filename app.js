@@ -1223,6 +1223,9 @@ var BetBoxButton = React.createClass({
           Dispatcher.sendAction('UPDATE_USER', {
             balance: worldStore.state.user.balance + bet.profit
           });
+
+          // Update user
+          Dispatcher.sendAction('START_REFRESHING_USER');
         },
         error: function(xhr) {
           console.log('Error');
@@ -1444,15 +1447,7 @@ var UserBalanceBox = React.createClass({
             {className: 'pull-right'},
             el.span(
               null,
-              worldStore.state.user.betted_count + ' bets | '
-            ),
-            el.span(
-              null,
-              worldStore.state.user.betted_wager / 100 + ' bits wagered | '
-            ),
-            el.span(
-              null,
-              worldStore.state.user.balance / 100 + ' bits in balance'
+              'Balance: '+ worldStore.state.user.balance / 100 + ' bits '
             ),
             // Refresh button
             el.button(
@@ -1469,23 +1464,26 @@ var UserBalanceBox = React.createClass({
               },
               el.span({className: 'glyphicon glyphicon-refresh'})
             )
+          ),
+          el.div(
+            {className: 'clearfix'},
+            null
+          ),
+          el.div(
+            {className: 'pull-right'},
+            el.span(
+              null,
+              worldStore.state.user.betted_count + ' bets | '
+            ),
+            el.span(
+              null,
+              worldStore.state.user.betted_wager / 100 + ' bits wagered'
+            ),
           )
         );
       } else {
         // User needs to login
-        innerNode = el.p(
-          null,
-          el.a(
-            {
-              href: config.mp_browser_uri + '/oauth/authorize' +
-                '?app_id=' + config.app_id +
-                '&redirect_uri=' + config.redirect_uri,
-              className: 'btn btn-success hvr-ripple-out wow fadeInDown',
-              'data-wow-delay':'0.5s'
-            },
-            'Login with Moneypot'
-          )
-        );
+        innerNode = null;
       }
       return el.div(
         null,
