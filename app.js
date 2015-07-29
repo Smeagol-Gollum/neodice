@@ -1282,12 +1282,12 @@ var BetBoxButton = React.createClass({
           {className: 'row'},
           // bet hi
           el.div(
-            {className: 'col-xs-6'},
+            {className: 'col-xs-4'},
             el.button(
               {
                 id: 'bet-hi',
                 type: 'button',
-                className: 'btn btn-lg btn-primary btn-block',
+                className: 'btn btn-lg btn-primary hvr-ripple-out btn-block',
                 onClick: this._makeBetHandler('>'),
                 disabled: !!this.state.waitingForServer
               },
@@ -1296,16 +1296,29 @@ var BetBoxButton = React.createClass({
           ),
           // bet lo
           el.div(
-            {className: 'col-xs-6'},
+            {className: 'col-xs-4'},
             el.button(
               {
                 id: 'bet-lo',
                 type: 'button',
-                className: 'btn btn-lg btn-primary btn-block',
+                className: 'btn btn-lg btn-primary hvr-ripple-out btn-block',
                 onClick: this._makeBetHandler('<'),
                 disabled: !!this.state.waitingForServer
               },
               'Bet Lo ', worldStore.state.hotkeysEnabled ? el.kbd(null, 'L') : ''
+            )
+          ),
+          el.div(
+            {className: 'col-xs-4'},
+            el.button(
+              {
+                id: 'bet-bot',
+                type: 'button',
+                className: 'btn btn-lg btn-info hvr-ripple-out btn-block',
+                'data-toggle': 'modal',
+                'data-target': '#autobet-modal'
+              },
+              'Autobet (beta)'
             )
           )
         );
@@ -1364,6 +1377,162 @@ var HotkeyToggle = React.createClass({
           el.span({className: 'label label-default'}, 'OFF')
         )
       )
+    );
+  }
+});
+
+var AutobetModal = React.createClass({
+  displayName: 'AutobetModal',
+  _onStoreChange: function() {
+    this.forceUpdate();
+  },
+  componentDidMount: function() {
+    worldStore.on('change', this._onStoreChange);
+  },
+  componentWillUnmount: function() {
+    worldStore.off('change', this._onStoreChange);
+  },
+  _autoBetHandler: function(cond) {
+    var self = this;
+
+    console.assert(cond === '<' || cond === '>');
+
+    return function(e) {
+      console.log('Placing bet...');
+
+      // Indicate that we are waiting for server response
+      self.setState({ waitingForServer: true });
+
+      var hash = betStore.state.nextHash;
+      console.assert(typeof hash === 'string');
+
+      var wagerSatoshis = betStore.state.wager.num * 100;
+      var multiplier = betStore.state.multiplier.num;
+      var payoutSatoshis = wagerSatoshis * multiplier;
+
+      var number = helpers.calcNumber(
+        cond, helpers.multiplierToWinProb(multiplier)
+      );
+
+      var params = {
+        wager: wagerSatoshis,
+        client_seed: 0, // TODO
+        hash: hash,
+        cond: cond,
+        target: number,
+        payout: payoutSatoshis
+      };
+
+      MoneyPot.placeSimpleDiceBet(params, {
+        success: function(bet) {
+          console.log('Successfully placed bet:', bet);
+          // Append to bet list
+
+          // We don't get this info from the API, so assoc it for our use
+          bet.meta = {
+            cond: cond,
+            number: number,
+            hash: hash,
+            isFair: CryptoJS.SHA256(bet.secret + '|' + bet.salt).toString() === hash
+          };
+
+          Dispatcher.sendAction('NEW_BET', bet);
+
+          // Update next bet hash
+          Dispatcher.sendAction('SET_NEXT_HASH', bet.next_hash);
+
+          // Update user balance
+          Dispatcher.sendAction('UPDATE_USER', {
+            balance: worldStore.state.user.balance + bet.profit
+          });
+
+          // Update user
+          Dispatcher.sendAction('START_REFRESHING_USER');
+        },
+        error: function(xhr) {
+          console.log('Error');
+          if (xhr.responseJSON && xhr.responseJSON) {
+            alert(xhr.responseJSON.error);
+          } else {
+            alert('Internal Error');
+          }
+        },
+        complete: function() {
+          self.setState({ waitingForServer: false });
+          // Force re-validation of wager
+          Dispatcher.sendAction('UPDATE_WAGER', {
+            str: betStore.state.wager.str
+          });
+        }
+      });
+    };
+  },
+  render: function() {
+    return el.div(
+      null,
+      el.div(
+        {className: 'modal fade', id: 'autobet-modal', 'tabIndex':'-1'},
+        el.div(
+          {className: 'modal-dialog'},
+          el.div(
+            {className: 'modal-content'},
+            el.div(
+              {className: 'modal-header'},
+              el.button(
+                {className: 'close', 'type':'button', 'data-dismiss':'modal'},
+                el.span(
+                  {className: 'fa fa-close'},
+                  null
+                )
+              ),
+              el.h4(
+                {className: 'modal-title'},
+                'Autobetter'
+              )
+            ),
+            el.div(
+              {className: 'modal-body'},
+              el.div(
+                {className: 'col-xs-12'},
+                React.createElement(UserBalanceBox, null)
+              ),
+              el.div(
+                {className: 'col-xs-6'},
+                React.createElement(BetBoxWager, null)
+              ),
+              el.div(
+                {className: 'col-xs-6'},
+                React.createElement(BetBoxMultiplier, null)
+              ),
+              // HR
+              el.div(
+                {className: 'row'},
+                el.div(
+                  {className: 'col-xs-12'},
+                  el.hr(null)
+                )
+              ),
+              // Bet info bar
+              el.div(
+                null,
+                el.div(
+                  {className: 'col-sm-6'},
+                  React.createElement(BetBoxProfit, null)
+                ),
+                el.div(
+                  {className: 'col-sm-6'},
+                  React.createElement(BetBoxChance, null)
+                )
+              )
+            )
+          )
+        ),
+        el.div(
+          {className: 'panel-footer clearfix'},
+          React.createElement(BetBoxButton, null)
+        )
+      ),
+      React.createElement(HotkeyToggle, null)
     );
   }
 });
@@ -1908,6 +2077,8 @@ var App = React.createClass({
         {className: 'col-sm-6 col-sm-offset-3 wow fadeIn', 'data-wow-delay':'0.3s'},
         React.createElement(TabContent, null)
       ),
+      // Autobet Modal
+      React.createElement(AutobetModal, null),
       // Footer
       React.createElement(Footer, null)
     );

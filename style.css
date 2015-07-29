@@ -82,6 +82,18 @@ body::before {
 .btn-success.hvr-ripple-out:hover {
   background: #5cb85c;
 }
+.btn-primary.hvr-ripple-out::before {
+  border: #337ab7 solid 6px;
+}
+.btn-primary.hvr-ripple-out:hover {
+  background: #337ab7;
+}
+.btn-info.hvr-ripple-out::before {
+  border: #5bc0de solid 6px;
+}
+.btn-info.hvr-ripple-out:hover {
+  background: #5bc0de;
+}
 
 /* links */
 a {
