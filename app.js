@@ -1426,7 +1426,7 @@ var UserBalanceBox = React.createClass({
             el.button(
               {
                 type: 'button',
-                className: 'btn navbar-btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
+                className: 'btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
                 onClick: this._openDepositPopup
               },
               'Deposit'
@@ -1434,19 +1434,21 @@ var UserBalanceBox = React.createClass({
             el.button(
               {
                 type: 'button',
-                className: 'btn btn-default navbar-btn btn-xs',
+                className: 'btn btn-danger btn-xs',
                 onClick: this._openWithdrawPopup
               },
               'Withdraw'
             )
           ),
-          // Balance
-          el.span(
-            {
-              null,
-              style: {marginRight: '5px'}
-            },
-            worldStore.state.user.balance / 100 + ' bits'
+          el.div(
+            null,
+            el.span(
+              {
+                null,
+                style: {marginRight: '5px'}
+              },
+              worldStore.state.user.balance / 100 + ' bits'
+            )
           ),
           // Refresh button
           el.button(
