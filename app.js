@@ -1443,10 +1443,7 @@ var UserBalanceBox = React.createClass({
           el.div(
             null,
             el.span(
-              {
-                null,
-                style: {marginRight: '5px'}
-              },
+              null,
               worldStore.state.user.balance / 100 + ' bits'
             )
           ),
