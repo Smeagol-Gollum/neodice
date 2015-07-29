@@ -437,7 +437,7 @@ var betStore = new Store('bet', {
     self.emitter.emit('change', self.state);
   });
   Dispatcher.registerCallback('UPDATE_AUTO_WIN', function(newAutoWin) {
-    self.state.autoWin = _.merge({}, self.state.autoWin, autoWin);
+    self.state.autoWin = _.merge({}, self.state.autoWin, newAutoWin);
     self.emitter.emit('change', self.state);
   });
   Dispatcher.registerCallback('UPDATE_AUTO_LOSS', function(newAutoLoss) {
