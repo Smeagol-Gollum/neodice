@@ -1426,7 +1426,7 @@ var UserBalanceBox = React.createClass({
             el.button(
               {
                 type: 'button',
-                className: 'btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
+                className: 'btn btn-success btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
                 onClick: this._openDepositPopup
               },
               'Deposit'
@@ -1444,7 +1444,15 @@ var UserBalanceBox = React.createClass({
             {className: 'pull-right'},
             el.span(
               null,
-              worldStore.state.user.balance / 100 + ' bits'
+              worldStore.state.user.betted_count + ' bets | '
+            ),
+            el.span(
+              null,
+              worldStore.state.user.betted_wager / 100 + ' bits wagered | '
+            ),
+            el.span(
+              null,
+              worldStore.state.user.balance / 100 + ' bits in balance'
             ),
             // Refresh button
             el.button(
