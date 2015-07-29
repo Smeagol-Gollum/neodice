@@ -385,6 +385,16 @@ var betStore = new Store('bet', {
     num: 2.00,
     error: undefined
   },
+  autoLoss: {
+    str: '50',
+    num: 50,
+    error: undefined
+  },
+  autoWin: {
+    str: '0',
+    num: 0,
+    error: undefined
+  }
   hotkeysEnabled: false
 }, function() {
   var self = this;
@@ -426,12 +436,12 @@ var betStore = new Store('bet', {
     self.state.multiplier = _.merge({}, self.state.multiplier, newMult);
     self.emitter.emit('change', self.state);
   });
-  Dispatcher.registerCallback('UPDATE_AUTO_WIN', function(newautoWin) {
+  Dispatcher.registerCallback('UPDATE_AUTO_WIN', function(newAutoWin) {
     self.state.autoWin = _.merge({}, self.state.autoWin, autoWin);
     self.emitter.emit('change', self.state);
   });
-  Dispatcher.registerCallback('UPDATE_AUTO_LOSS', function(newautoLoss) {
-    self.state.autoLoss = _.merge({}, self.state.autoLoss, newautoLoss);
+  Dispatcher.registerCallback('UPDATE_AUTO_LOSS', function(newAutoLoss) {
+    self.state.autoLoss = _.merge({}, self.state.autoLoss, newAutoLoss);
     self.emitter.emit('change', self.state);
   });
 });
