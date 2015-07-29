@@ -588,9 +588,28 @@ var UserBox = React.createClass({
     } else if (worldStore.state.user) {
       innerNode = el.div(
         null,
+        // Logged in as...
+        el.span(
+          {className: 'navbar-text'},
+          'Logged in as ',
+          el.code(null, worldStore.state.user.uname)
+        ),
+        // Logout button
+        el.button(
+          {
+            type: 'button',
+            onClick: this._onLogout,
+            className: 'navbar-btn btn btn-default'
+          },
+          'Logout'
+        ),
+        el.div(
+          {className: 'clearfix'},
+          null
+        ),
         // Deposit/Withdraw popup buttons
         el.div(
-          {className: 'btn-group navbar-left btn-group-xs'},
+          {className: 'btn-group btn-group-xs'},
           el.button(
             {
               type: 'button',
@@ -630,21 +649,6 @@ var UserBox = React.createClass({
             }
           },
           el.span({className: 'glyphicon glyphicon-refresh'})
-        ),
-        // Logged in as...
-        el.span(
-          {className: 'navbar-text'},
-          'Logged in as ',
-          el.code(null, worldStore.state.user.uname)
-        ),
-        // Logout button
-        el.button(
-          {
-            type: 'button',
-            onClick: this._onLogout,
-            className: 'navbar-btn btn btn-default'
-          },
-          'Logout'
         )
       );
     } else {
