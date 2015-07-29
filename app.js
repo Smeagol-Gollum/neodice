@@ -1415,6 +1415,18 @@ var UserBalanceBox = React.createClass({
   },
   render: function() {
       var innerNode;
+      var levels = {
+        0: 'Neophyte',
+        1: 'Beginner',
+        2: 'Novice',
+        3: 'Competent',
+        4: 'Trained',
+        5: 'Advanced',
+        6: 'Master',
+        7: 'Dragon',
+        8: 'Wizard',
+        9: 'Iron Man'
+      }
       if (worldStore.state.isLoading) {
         innerNode = el.p(
           null,
@@ -1444,7 +1456,7 @@ var UserBalanceBox = React.createClass({
             )
           ),
           el.div(
-            {className: 'pull-right'},
+            {className: 'pull-left'},
             el.span(
               null,
               'Balance: '+ worldStore.state.user.balance / 100 + ' bits '
@@ -1466,18 +1478,21 @@ var UserBalanceBox = React.createClass({
             )
           ),
           el.div(
-            {className: 'clearfix'},
-            null
-          ),
-          el.div(
             {className: 'pull-right'},
             el.span(
               null,
-              worldStore.state.user.betted_count + ' bets | '
+              'XP: ' + Math.floor((worldStore.state.user.betted_wager / 100) * worldStore.state.user.betted_count)
+              //'XP: ' + Math.floor(Math.sqrt((worldStore.state.user.betted_wager / (100)) * (worldStore.state.user.betted_count / 10)))
             ),
+            el.br(),
             el.span(
               null,
               worldStore.state.user.betted_wager / 100 + ' bits wagered'
+            ),
+            el.br(),
+            el.span(
+              null,
+              worldStore.state.user.betted_count + ' bets | '
             )
           )
         );
