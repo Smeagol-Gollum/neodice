@@ -1367,52 +1367,120 @@ var HotkeyToggle = React.createClass({
 
 var UserBalanceBox = React.createClass({
   displayName: 'UserBalanceBox',
+  _onStoreChange: function() {
+    this.forceUpdate();
+  },
+  componentDidMount: function() {
+    worldStore.on('change', this._onStoreChange);
+    betStore.on('change', this._onStoreChange);
+  },
+  componentWillUnount: function() {
+    worldStore.off('change', this._onStoreChange);
+    betStore.off('change', this._onStoreChange);
+  },
+  _onLogout: function() {
+    Dispatcher.sendAction('USER_LOGOUT');
+  },
+  _onRefreshUser: function() {
+    Dispatcher.sendAction('START_REFRESHING_USER');
+  },
+  _openWithdrawPopup: function() {
+    var windowUrl = config.mp_browser_uri + '/dialog/withdraw?app_id=' + config.app_id;
+    var windowName = 'manage-auth';
+    var windowOpts = [
+      'width=420',
+      'height=350',
+      'left=100',
+      'top=100'
+    ].join(',');
+    var windowRef = window.open(windowUrl, windowName, windowOpts);
+    windowRef.focus();
+    return false;
+  },
+  _openDepositPopup: function() {
+    var windowUrl = config.mp_browser_uri + '/dialog/deposit?app_id=' + config.app_id;
+    var windowName = 'manage-auth';
+    var windowOpts = [
+      'width=420',
+      'height=350',
+      'left=100',
+      'top=100'
+    ].join(',');
+    var windowRef = window.open(windowUrl, windowName, windowOpts);
+    windowRef.focus();
+    return false;
+  },
   render: function() {
-    return (
-      // Deposit/Withdraw popup buttons
-      el.div(
-        {className: 'btn-group btn-group-xs'},
-        el.button(
-          {
-            type: 'button',
-            className: 'btn navbar-btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
-            onClick: this._openDepositPopup
-          },
-          'Deposit'
+      var innerNode;
+      if (worldStore.state.isLoading) {
+        innerNode = el.p(
+          null,
+          'Loading...'
+        );
+      } else if (worldStore.state.user) {
+        innerNode = el.div(
+          // Deposit/Withdraw popup buttons
+          {className: 'btn-group btn-group-xs'},
+          el.button(
+            {
+              type: 'button',
+              className: 'btn navbar-btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
+              onClick: this._openDepositPopup
+            },
+            'Deposit'
+          ),
+          el.button(
+            {
+              type: 'button',
+              className: 'btn btn-default navbar-btn btn-xs',
+              onClick: this._openWithdrawPopup
+            },
+            'Withdraw'
+          )
         ),
+        // Balance
+        el.span(
+          {
+            className: 'navbar-text',
+            style: {marginRight: '5px'}
+          },
+          worldStore.state.user.balance / 100 + ' bits'
+        ),
+        // Refresh button
         el.button(
           {
-            type: 'button',
-            className: 'btn btn-default navbar-btn btn-xs',
-            onClick: this._openWithdrawPopup
+            className: 'btn btn-link navbar-btn navbar-left ' + (worldStore.state.isRefreshingUser ? ' rotate' : ''),
+            title: 'Refresh Balance',
+            disabled: worldStore.state.isRefreshingUser,
+            onClick: this._onRefreshUser,
+            style: {
+              paddingLeft: 0,
+              paddingRight: 0,
+              marginRight: '10px'
+            }
           },
-          'Withdraw'
-        )
-      ),
-      // Balance
-      el.span(
-        {
-          className: 'navbar-text',
-          style: {marginRight: '5px'}
-        },
-        worldStore.state.user.balance / 100 + ' bits'
-      ),
-      // Refresh button
-      el.button(
-        {
-          className: 'btn btn-link navbar-btn navbar-left ' + (worldStore.state.isRefreshingUser ? ' rotate' : ''),
-          title: 'Refresh Balance',
-          disabled: worldStore.state.isRefreshingUser,
-          onClick: this._onRefreshUser,
-          style: {
-            paddingLeft: 0,
-            paddingRight: 0,
-            marginRight: '10px'
-          }
-        },
-        el.span({className: 'glyphicon glyphicon-refresh'})
-      )
-    );
+          el.span({className: 'glyphicon glyphicon-refresh'})
+        );
+      } else {
+        // User needs to login
+        innerNode = el.p(
+          null,
+          el.a(
+            {
+              href: config.mp_browser_uri + '/oauth/authorize' +
+                '?app_id=' + config.app_id +
+                '&redirect_uri=' + config.redirect_uri,
+              className: 'btn btn-success hvr-ripple-out wow fadeInDown',
+              'data-wow-delay':'0.5s'
+            },
+            'Login with Moneypot'
+          )
+        );
+      }
+      return el.div(
+        null,
+        innerNode
+      );
   }
 });
 
