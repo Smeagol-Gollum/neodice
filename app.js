@@ -394,7 +394,7 @@ var betStore = new Store('bet', {
     str: '0',
     num: 0,
     error: undefined
-  }
+  },
   hotkeysEnabled: false
 }, function() {
   var self = this;
