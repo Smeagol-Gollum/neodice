@@ -1441,26 +1441,26 @@ var UserBalanceBox = React.createClass({
             )
           ),
           el.div(
-            null,
+            {className: 'pull-right'},
             el.span(
               null,
               worldStore.state.user.balance / 100 + ' bits'
+            ),
+            // Refresh button
+            el.button(
+              {
+                className: 'btn btn-link' + (worldStore.state.isRefreshingUser ? ' rotate' : ''),
+                title: 'Refresh Balance',
+                disabled: worldStore.state.isRefreshingUser,
+                onClick: this._onRefreshUser,
+                style: {
+                  paddingLeft: 0,
+                  paddingRight: 0,
+                  marginRight: '10px'
+                }
+              },
+              el.span({className: 'glyphicon glyphicon-refresh'})
             )
-          ),
-          // Refresh button
-          el.button(
-            {
-              className: 'btn btn-link' + (worldStore.state.isRefreshingUser ? ' rotate' : ''),
-              title: 'Refresh Balance',
-              disabled: worldStore.state.isRefreshingUser,
-              onClick: this._onRefreshUser,
-              style: {
-                paddingLeft: 0,
-                paddingRight: 0,
-                marginRight: '10px'
-              }
-            },
-            el.span({className: 'glyphicon glyphicon-refresh'})
           )
         );
       } else {
