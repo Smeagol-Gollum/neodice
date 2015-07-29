@@ -1478,7 +1478,7 @@ var UserBalanceBox = React.createClass({
             el.span(
               null,
               worldStore.state.user.betted_wager / 100 + ' bits wagered'
-            ),
+            )
           )
         );
       } else {
