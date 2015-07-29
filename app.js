@@ -1708,8 +1708,8 @@ var AutobetButtons = React.createClass({
         'MULTIPLIER_TOO_PRECISE': 'Multiplier too precise',
         'MULTIPLIER_TOO_HIGH': 'Multiplier too high',
         'MULTIPLIER_TOO_LOW': 'Multiplier too low',
-        'INVALID_INCREASE': 'Invalid increase percentage'
-        'INCREASE_TOO_PRECISE': 'Increase percentage too precise',
+        'INVALID_INCREASE': 'Invalid increase percentage',
+        'INCREASE_TOO_PRECISE': 'Increase percentage too precise'
       };
 
       innerNode = el.button(
