@@ -1437,7 +1437,7 @@ var BetBox = React.createClass({
           el.div(
             {className: 'row'},
             el.div(
-              className: 'col-xs-12'},
+              {className: 'col-xs-12'},
               React.createElement(UserBalanceBox, null)
             ),
             el.div(
