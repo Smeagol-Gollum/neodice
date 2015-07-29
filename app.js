@@ -1381,6 +1381,60 @@ var HotkeyToggle = React.createClass({
   }
 });
 
+var AutobetWager = React.createClass({
+  displayName: 'AutobetWager',
+  // Hookup to stores
+  _onStoreChange: function() {
+    this.forceUpdate();
+  },
+  _onBalanceChange: function() {
+    // Force validation when user logs in
+    // TODO: Re-force it when user refreshes
+    Dispatcher.sendAction('UPDATE_WAGER', {});
+  },
+  componentDidMount: function() {
+    betStore.on('change', this._onStoreChange);
+    worldStore.on('change', this._onStoreChange);
+    worldStore.on('user_update', this._onBalanceChange);
+  },
+  componentWillUnmount: function() {
+    betStore.off('change', this._onStoreChange);
+    worldStore.off('change', this._onStoreChange);
+    worldStore.off('user_update', this._onBalanceChange);
+  },
+  _onWagerChange: function(e) {
+    var str = e.target.value;
+    Dispatcher.sendAction('UPDATE_WAGER', { str: str });
+  },
+  //
+  render: function() {
+    var style1 = { borderBottomLeftRadius: '0', borderBottomRightRadius: '0' };
+    var style2 = { borderTopLeftRadius: '0' };
+    var style3 = { borderTopRightRadius: '0' };
+    return el.div(
+      {className: 'form-group'},
+      el.p(
+        {className: 'lead'},
+        el.span(
+          // If wagerError, make the label red
+          betStore.state.wager.error ? { style: {color: 'red'} } : null,
+          'Base Bet:')
+      ),
+      el.input(
+        {
+          value: betStore.state.wager.str,
+          type: 'text',
+          className: 'form-control input-lg',
+          style: style1,
+          onChange: this._onWagerChange,
+          disabled: !!worldStore.state.isLoading,
+          placeholder: 'Bits'
+        }
+      )
+    );
+  }
+});
+
 var AutobetButtons = React.createClass({
   displayName: 'AutobetButtons',
   _onStoreChange: function() {
@@ -1614,7 +1668,7 @@ var AutobetModal = React.createClass({
                 ),
                 el.div(
                   {className: 'col-xs-6'},
-                  React.createElement(AutobetBoxWager, null)
+                  React.createElement(AutobetWager, null)
                 ),
                 el.div(
                   {className: 'col-xs-6'},
