@@ -179,6 +179,11 @@ var MoneyPot = (function() {
     makeMPRequest('POST', bodyParams, endpoint, callbacks);
   };
 
+  o.getUserInfo = function(bodyParams, callbacks) {
+    var endpoint = '/user-stats';
+    makeMPRequest('GET', bodyParams, endpoint, callbacks);
+  };
+
   return o;
 })();
 
@@ -602,53 +607,6 @@ var UserBox = React.createClass({
             className: 'navbar-btn btn btn-default'
           },
           'Logout'
-        ),
-        el.div(
-          {className: 'clearfix'},
-          null
-        ),
-        // Deposit/Withdraw popup buttons
-        el.div(
-          {className: 'btn-group btn-group-xs'},
-          el.button(
-            {
-              type: 'button',
-              className: 'btn navbar-btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
-              onClick: this._openDepositPopup
-            },
-            'Deposit'
-          ),
-          el.button(
-            {
-              type: 'button',
-              className: 'btn btn-default navbar-btn btn-xs',
-              onClick: this._openWithdrawPopup
-            },
-            'Withdraw'
-          )
-        ),
-        // Balance
-        el.span(
-          {
-            className: 'navbar-text',
-            style: {marginRight: '5px'}
-          },
-          worldStore.state.user.balance / 100 + ' bits'
-        ),
-        // Refresh button
-        el.button(
-          {
-            className: 'btn btn-link navbar-btn navbar-left ' + (worldStore.state.isRefreshingUser ? ' rotate' : ''),
-            title: 'Refresh Balance',
-            disabled: worldStore.state.isRefreshingUser,
-            onClick: this._onRefreshUser,
-            style: {
-              paddingLeft: 0,
-              paddingRight: 0,
-              marginRight: '10px'
-            }
-          },
-          el.span({className: 'glyphicon glyphicon-refresh'})
         )
       );
     } else {
@@ -1407,6 +1365,57 @@ var HotkeyToggle = React.createClass({
   }
 });
 
+var UserBalanceBox = React.createClass({
+  displayName: 'UserBalanceBox',
+  render: function() {
+    return (
+      // Deposit/Withdraw popup buttons
+      el.div(
+        {className: 'btn-group btn-group-xs'},
+        el.button(
+          {
+            type: 'button',
+            className: 'btn navbar-btn btn-xs ' + (betStore.state.wager.error === 'CANNOT_AFFORD_WAGER' ? 'btn-success' : 'btn-default'),
+            onClick: this._openDepositPopup
+          },
+          'Deposit'
+        ),
+        el.button(
+          {
+            type: 'button',
+            className: 'btn btn-default navbar-btn btn-xs',
+            onClick: this._openWithdrawPopup
+          },
+          'Withdraw'
+        )
+      ),
+      // Balance
+      el.span(
+        {
+          className: 'navbar-text',
+          style: {marginRight: '5px'}
+        },
+        worldStore.state.user.balance / 100 + ' bits'
+      ),
+      // Refresh button
+      el.button(
+        {
+          className: 'btn btn-link navbar-btn navbar-left ' + (worldStore.state.isRefreshingUser ? ' rotate' : ''),
+          title: 'Refresh Balance',
+          disabled: worldStore.state.isRefreshingUser,
+          onClick: this._onRefreshUser,
+          style: {
+            paddingLeft: 0,
+            paddingRight: 0,
+            marginRight: '10px'
+          }
+        },
+        el.span({className: 'glyphicon glyphicon-refresh'})
+      )
+    );
+  }
+});
+
 var BetBox = React.createClass({
   displayName: 'BetBox',
   _onStoreChange: function() {
@@ -1427,6 +1436,10 @@ var BetBox = React.createClass({
           {className: 'panel-body'},
           el.div(
             {className: 'row'},
+            el.div(
+              className: 'col-xs-12'},
+              React.createElement(UserBalanceBox, null)
+            ),
             el.div(
               {className: 'col-xs-6'},
               React.createElement(BetBoxWager, null)
