@@ -1435,6 +1435,115 @@ var AutobetWager = React.createClass({
   }
 });
 
+var AutobetLossIncrease = React.createClass({
+  displayName: 'AutobetLossIncrease',
+  // Hookup to stores
+  _onStoreChange: function() {
+    this.forceUpdate();
+  },
+  _onBalanceChange: function() {
+    // Force validation when user logs in
+    // TODO: Re-force it when user refreshes
+    Dispatcher.sendAction('UPDATE_WAGER', {});
+  },
+  componentDidMount: function() {
+    betStore.on('change', this._onStoreChange);
+    worldStore.on('change', this._onStoreChange);
+    worldStore.on('user_update', this._onBalanceChange);
+  },
+  componentWillUnmount: function() {
+    betStore.off('change', this._onStoreChange);
+    worldStore.off('change', this._onStoreChange);
+    worldStore.off('user_update', this._onBalanceChange);
+  },
+  _onWagerChange: function(e) {
+    var str = e.target.value;
+    Dispatcher.sendAction('UPDATE_WAGER', { str: str });
+  },
+  //
+  render: function() {
+    var style1 = { borderBottomLeftRadius: '0', borderBottomRightRadius: '0' };
+    var style2 = { borderTopLeftRadius: '0' };
+    var style3 = { borderTopRightRadius: '0' };
+    return el.div(
+      {className: 'form-group'},
+      el.p(
+        {className: 'lead'},
+        el.span(
+          // If wagerError, make the label red
+          betStore.state.wager.error ? { style: {color: 'red'} } : null,
+          'On Loss Increase By (%):')
+      ),
+      el.input(
+        {
+          value: betStore.state.wager.str,
+          type: 'text',
+          className: 'form-control input-lg',
+          style: style1,
+          onChange: this._onWagerChange,
+          disabled: !!worldStore.state.isLoading,
+          placeholder: '50'
+        }
+      )
+    );
+  }
+});
+
+var AutobetWinIncrease = React.createClass({
+  displayName: 'AutobetWinIncrease',
+  // Hookup to stores
+  _onStoreChange: function() {
+    this.forceUpdate();
+  },
+  _onBalanceChange: function() {
+    // Force validation when user logs in
+    // TODO: Re-force it when user refreshes
+    Dispatcher.sendAction('UPDATE_WAGER', {});
+  },
+  componentDidMount: function() {
+    betStore.on('change', this._onStoreChange);
+    worldStore.on('change', this._onStoreChange);
+    worldStore.on('user_update', this._onBalanceChange);
+  },
+  componentWillUnmount: function() {
+    betStore.off('change', this._onStoreChange);
+    worldStore.off('change', this._onStoreChange);
+    worldStore.off('user_update', this._onBalanceChange);
+  },
+  _onWagerChange: function(e) {
+    var str = e.target.value;
+    Dispatcher.sendAction('UPDATE_WAGER', { str: str });
+  },
+  //
+  render: function() {
+    var style1 = { borderBottomLeftRadius: '0', borderBottomRightRadius: '0' };
+    var style2 = { borderTopLeftRadius: '0' };
+    var style3 = { borderTopRightRadius: '0' };
+    return el.div(
+      {className: 'form-group'},
+      el.p(
+        {className: 'lead'},
+        el.span(
+          // If wagerError, make the label red
+          betStore.state.wager.error ? { style: {color: 'red'} } : null,
+          'On Win Increase By (%):')
+      ),
+      el.input(
+        {
+          value: betStore.state.wager.str,
+          type: 'text',
+          className: 'form-control input-lg',
+          style: style1,
+          onChange: this._onWagerChange,
+          disabled: !!worldStore.state.isLoading,
+          placeholder: '50'
+        }
+      )
+    );
+  }
+});
+
+
 var AutobetButtons = React.createClass({
   displayName: 'AutobetButtons',
   _onStoreChange: function() {
@@ -1674,6 +1783,14 @@ var AutobetModal = React.createClass({
                   {className: 'col-xs-6'},
                   React.createElement(BetBoxMultiplier, null)
                 ),
+                el.div(
+                  {className: 'col-xs-6'},
+                  React.createElement(AutobetLossIncrease, null)
+                ),
+                el.div(
+                  {className: 'col-xs-6'},
+                  React.createElement(AutobetWinIncrease, null)
+                ),
                 // HR
                 el.div(
                   {className: 'row'},
@@ -1686,11 +1803,7 @@ var AutobetModal = React.createClass({
                   // Bet info bar
                   {className: 'row'},
                   el.div(
-                    {className: 'col-sm-6'},
-                    React.createElement(BetBoxProfit, null)
-                  ),
-                  el.div(
-                    {className: 'col-sm-6'},
+                    {className: 'col-sm-12 text-center text-success'},
                     React.createElement(BetBoxChance, null)
                   )
                 ),
