@@ -1300,7 +1300,7 @@ var BetBoxButton = React.createClass({
           {className: 'row'},
           // bet hi
           el.div(
-            {className: 'col-xs-4'},
+            {className: 'col-xs-4 col-xs-offset-2'},
             el.button(
               {
                 id: 'bet-hi',
@@ -1325,7 +1325,7 @@ var BetBoxButton = React.createClass({
               },
               'Bet Lo ', worldStore.state.hotkeysEnabled ? el.kbd(null, 'L') : ''
             )
-          ),
+          )/*,
           el.div(
             {className: 'col-xs-4'},
             el.button(
@@ -1338,7 +1338,7 @@ var BetBoxButton = React.createClass({
               },
               'Autobet (beta)'
             )
-          )
+          )*/
         );
     } else {
       // If user isn't logged in, give them link to /oauth/authorize
