@@ -1493,43 +1493,49 @@ var AutobetModal = React.createClass({
             el.div(
               {className: 'modal-body'},
               el.div(
-                {className: 'col-xs-12'},
-                React.createElement(UserBalanceBox, null)
-              ),
-              el.div(
-                {className: 'col-xs-6'},
-                React.createElement(BetBoxWager, null)
-              ),
-              el.div(
-                {className: 'col-xs-6'},
-                React.createElement(BetBoxMultiplier, null)
-              ),
-              // HR
-              el.div(
                 {className: 'row'},
                 el.div(
                   {className: 'col-xs-12'},
-                  el.hr(null)
-                )
-              ),
-              // Bet info bar
-              el.div(
-                null,
-                el.div(
-                  {className: 'col-sm-6'},
-                  React.createElement(BetBoxProfit, null)
+                  React.createElement(UserBalanceBox, null)
                 ),
                 el.div(
-                  {className: 'col-sm-6'},
-                  React.createElement(BetBoxChance, null)
+                  {className: 'col-xs-6'},
+                  React.createElement(BetBoxWager, null)
+                ),
+                el.div(
+                  {className: 'col-xs-6'},
+                  React.createElement(BetBoxMultiplier, null)
+                ),
+                // HR
+                el.div(
+                  {className: 'row'},
+                  el.div(
+                    {className: 'col-xs-12'},
+                    el.hr(null)
+                  )
+                ),
+                el.div(
+                  // Bet info bar
+                  {className: 'row'},
+                  el.div(
+                    {className: 'col-sm-6'},
+                    React.createElement(BetBoxProfit, null)
+                  ),
+                  el.div(
+                    {className: 'col-sm-6'},
+                    React.createElement(BetBoxChance, null)
+                  )
+                ),
+                el.div(
+                  {className: 'row'},
+                  el.div(
+                    {className: 'col-xs-12'},
+                    React.createElement(BetBoxButton, null)
+                  )
                 )
               )
             )
           )
-        ),
-        el.div(
-          {className: 'panel-footer clearfix'},
-          React.createElement(BetBoxButton, null)
         )
       ),
       React.createElement(HotkeyToggle, null)
