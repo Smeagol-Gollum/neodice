@@ -1483,7 +1483,7 @@ var AutobetLossIncrease = React.createClass({
         error: null
       });
     }
-  },,
+  },
   _onWagerChange: function(e) {
     var str = e.target.value;
     console.log('You entered', str, 'as your multiplier');
