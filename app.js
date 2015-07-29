@@ -426,6 +426,14 @@ var betStore = new Store('bet', {
     self.state.multiplier = _.merge({}, self.state.multiplier, newMult);
     self.emitter.emit('change', self.state);
   });
+  Dispatcher.registerCallback('UPDATE_AUTO_WIN', function(newautoWin) {
+    self.state.autoWin = _.merge({}, self.state.autoWin, autoWin);
+    self.emitter.emit('change', self.state);
+  });
+  Dispatcher.registerCallback('UPDATE_AUTO_LOSS', function(newautoLoss) {
+    self.state.autoLoss = _.merge({}, self.state.autoLoss, newautoLoss);
+    self.emitter.emit('change', self.state);
+  });
 });
 
 // The general store that holds all things until they are separated
@@ -1441,11 +1449,6 @@ var AutobetLossIncrease = React.createClass({
   _onStoreChange: function() {
     this.forceUpdate();
   },
-  _onBalanceChange: function() {
-    // Force validation when user logs in
-    // TODO: Re-force it when user refreshes
-    Dispatcher.sendAction('UPDATE_WAGER', {});
-  },
   componentDidMount: function() {
     betStore.on('change', this._onStoreChange);
     worldStore.on('change', this._onStoreChange);
@@ -1456,9 +1459,36 @@ var AutobetLossIncrease = React.createClass({
     worldStore.off('change', this._onStoreChange);
     worldStore.off('user_update', this._onBalanceChange);
   },
+  _validateMultiplier: function(newStr) {
+    var num = parseFloat(newStr, 10);
+
+    // If num is a number, ensure it's at least 0.01x
+    // if (Number.isFinite(num)) {
+    //   num = Math.max(num, 0.01);
+    //   this.props.currBet.setIn(['multiplier', 'str'], num.toString());
+    // }
+
+    var isFloatRegexp = /^(\d*\.)?\d+$/;
+
+    // Ensure str is a number
+    if (isNaN(num) || !isFloatRegexp.test(newStr)) {
+      Dispatcher.sendAction('UPDATE_AUTO_LOSS', { error: 'INVALID_INCREASE' });
+      // Ensure multiplier is >= 1.00x
+    } else if (helpers.getPrecision(num) > 2) {
+      Dispatcher.sendAction('UPDATE_AUTO_LOSS', { error: 'INCREASE_TOO_PRECISE' });
+      // multiplier str is valid
+    } else {
+      Dispatcher.sendAction('UPDATE_AUTO_LOSS', {
+        num: num,
+        error: null
+      });
+    }
+  },,
   _onWagerChange: function(e) {
     var str = e.target.value;
-    Dispatcher.sendAction('UPDATE_WAGER', { str: str });
+    console.log('You entered', str, 'as your multiplier');
+    Dispatcher.sendAction('UPDATE_AUTO_LOSS', { str: str });
+    this._validateMultiplier(str);
   },
   //
   render: function() {
@@ -1495,11 +1525,6 @@ var AutobetWinIncrease = React.createClass({
   _onStoreChange: function() {
     this.forceUpdate();
   },
-  _onBalanceChange: function() {
-    // Force validation when user logs in
-    // TODO: Re-force it when user refreshes
-    Dispatcher.sendAction('UPDATE_WAGER', {});
-  },
   componentDidMount: function() {
     betStore.on('change', this._onStoreChange);
     worldStore.on('change', this._onStoreChange);
@@ -1510,9 +1535,35 @@ var AutobetWinIncrease = React.createClass({
     worldStore.off('change', this._onStoreChange);
     worldStore.off('user_update', this._onBalanceChange);
   },
+  _validateMultiplier: function(newStr) {
+    var num = parseFloat(newStr, 10);
+
+    // If num is a number, ensure it's at least 0.01x
+    // if (Number.isFinite(num)) {
+    //   num = Math.max(num, 0.01);
+    //   this.props.currBet.setIn(['multiplier', 'str'], num.toString());
+    // }
+
+    var isFloatRegexp = /^(\d*\.)?\d+$/;
+
+    // Ensure str is a number
+    if (isNaN(num) || !isFloatRegexp.test(newStr)) {
+      Dispatcher.sendAction('UPDATE_AUTO_WIN', { error: 'INVALID_INCREASE' });
+    } else if (helpers.getPrecision(num) > 2) {
+      Dispatcher.sendAction('UPDATE_AUTO_WIN', { error: 'INCREASE_TOO_PRECISE' });
+      // multiplier str is valid
+    } else {
+      Dispatcher.sendAction('UPDATE_AUTO_WIN', {
+        num: num,
+        error: null
+      });
+    }
+  },,
   _onWagerChange: function(e) {
     var str = e.target.value;
-    Dispatcher.sendAction('UPDATE_WAGER', { str: str });
+    console.log('You entered', str, 'as your multiplier');
+    Dispatcher.sendAction('UPDATE_AUTO_WIN', { str: str });
+    this._validateMultiplier(str);
   },
   //
   render: function() {
@@ -1526,7 +1577,7 @@ var AutobetWinIncrease = React.createClass({
         el.span(
           // If wagerError, make the label red
           betStore.state.wager.error ? { style: {color: 'red'} } : null,
-          'On Win Increase By (%):')
+          'On Loss Increase By (%):')
       ),
       el.input(
         {
@@ -1542,7 +1593,6 @@ var AutobetWinIncrease = React.createClass({
     );
   }
 });
-
 
 var AutobetButtons = React.createClass({
   displayName: 'AutobetButtons',
@@ -1657,7 +1707,9 @@ var AutobetButtons = React.createClass({
         'INVALID_MULTIPLIER': 'Invalid multiplier',
         'MULTIPLIER_TOO_PRECISE': 'Multiplier too precise',
         'MULTIPLIER_TOO_HIGH': 'Multiplier too high',
-        'MULTIPLIER_TOO_LOW': 'Multiplier too low'
+        'MULTIPLIER_TOO_LOW': 'Multiplier too low',
+        'INVALID_INCREASE': 'Invalid increase percentage'
+        'INCREASE_TOO_PRECISE': 'Increase percentage too precise',
       };
 
       innerNode = el.button(
@@ -1804,7 +1856,8 @@ var AutobetModal = React.createClass({
                   {className: 'row'},
                   el.div(
                     {className: 'col-sm-12 text-center text-success'},
-                    React.createElement(BetBoxChance, null)
+                    React.createElement(BetBoxChance, null),
+                    el.br()
                   )
                 ),
                 el.div(
