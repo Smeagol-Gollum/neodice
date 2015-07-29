@@ -121,6 +121,9 @@ a:hover {
 table.table {
   background: white;
 }
+#recaptcha-target {
+  background: white;
+}
 
 /* ChatBox */
 
